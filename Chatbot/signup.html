@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign Up Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to top, #fff, plum) no-repeat center center fixed;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+        }
+
+        .signup-box {
+            width: 320px;
+            padding: 20px 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        h2 {
+            font-size: 18px;
+            color: black;
+            margin-top: 50px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: red;
+            margin-bottom: 20px;
+        }
+
+        .signup-box p {
+            margin: 0;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .signup-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .signup-box input[type="submit"] {
+            background: #ffc680;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .signup-box input[type="submit"]:hover {
+            background: #ff8c00;
+        }
+
+        .signup-box a {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .signup-box a:hover {
+            color: #ff8c00;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-box">
+        <img src="bot1.png" alt="bot" class="avatar">
+        <h2>Conversational & Image Recognition Chatbot</h2>
+        <h1>Sign Up Here</h1>
+
+        <form method="post" action="{% url 'signup' %}" id="signupForm">
+            {% csrf_token %}
+            <p>Username</p>
+            <input type="text" id="username" placeholder="Enter your username" required>
+            <p>Email</p>
+            <input type="email" id="email" placeholder="Enter your email" required>
+            <p>Password</p>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <p>Confirm Password</p>
+            <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+            <input type="submit" value="Sign Up">
+        </form>
+        <a href="{% url 'login' %}">Already have an account? Login here</a>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();  
+
+            var username = document.getElementById("username").value;
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+            } else {
+                alert("Sign Up Successful! You can now log in.");
+                window.location.assign('login.html');
+            }
+        });
+    </script>
+</body>
+</html>
