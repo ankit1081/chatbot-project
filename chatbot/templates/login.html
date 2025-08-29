@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <style>
+        /* CSS remains unchanged, retaining your design styles */
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(to top, #fff, plum) no-repeat center fixed;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-box {
+            width: 510px;
+            padding: 40px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            position: absolute;
+            top: -50px;
+            left: calc(50% - 50px);
+        }
+
+        h2 {
+            font-size: 18px;
+            color: black;
+            margin-top: 50px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 20px;
+            color: red;
+            margin-bottom: 20px;
+        }
+
+        .login-box p {
+            margin: 0;
+            padding: 0;
+            color: #000;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .login-box input[type="text"],
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 1px solid #000;
+            outline: none;
+            color: #000;
+            font-size: 16px;
+        }
+
+        .login-box input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background: #ffc680;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .login-box input[type="submit"]:hover {
+            background: red;
+            color: #fff;
+        }
+
+        .signup-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #6487bd;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .signup-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    <div class="login-box">
+        <form method="post" action="{% url 'login' %}">
+            <img src="{% static 'bot1.png' %}" alt="avatar" class="avatar">
+            <h2>Conversational & Image Recognition Chatbot</h2>
+            {% csrf_token %}
+            <h1>Login Here</h1>
+            {% if error %}
+                <p style="color:red;">{{ error }}</p>
+            {% endif %}
+            <p>Username</p>
+            <input type="text" id="username" placeholder="Enter your username" name="username" required>
+            <p>Password</p>
+            <input type="password" id="password" placeholder="Enter your password" name="password" required>
+            <input type="submit" id="login" value="Login">
+        </form>
+        <a href="{% url 'signup' %}" class="signup-button">Sign Up</a>
+    </div>
+    {% endblock %}
+</body>
+</html>

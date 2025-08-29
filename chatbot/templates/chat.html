@@ -1,0 +1,456 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <title>Chatbot</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to top, #fff, plum) no-repeat center center fixed;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            width: 150vh;
+            height: 84vh;
+            text-align: center;
+            background-color: rgb(49, 47, 47);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .chat-history {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgb(49, 47, 47);
+            gap: 13px
+        }
+
+        .chatbot-message {
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            padding: 10px;
+            text-align: left;
+            margin: 0;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 90%;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            max-width: 90%; 
+            margin: 0;  
+            padding: 8px; 
+            word-wrap: break-word;
+            display: inline-block;  
+            border-radius: 15px;  
+            background-color: #000;  
+            color: white;
+            text-align: left;
+            vertical-align: top;
+            align-self: flex-end;
+        }
+
+        .user-image-container {
+            background-color: none;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 0;
+            max-width: 70%;
+            align-self: flex-end;
+        }
+
+        .user-image-container img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        .user-uploaded-image {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 10px;
+            max-height: 40px;
+        }
+
+        .user-uploaded-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .menu-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .menu-icon img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .menu-icon:hover img {
+            filter: brightness(1.2);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background-color: #333;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 150px;
+        }
+
+        .dropdown-menu a {
+            color:white;
+            padding: 10px;
+            display: block;
+            text-decoration: none;
+            border-bottom: 1px solid #444;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #575757;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .input-section {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 25px;
+            background-color: black;
+            position: relative;
+        }
+
+        .input-section input[type="text"] {
+            border: none;
+            background: none;
+            color: white;
+            flex-grow: 1;
+            font-size: 14px;
+            padding: 10px;
+            outline: none;
+        }
+
+        .input-section button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ccc;
+            font-size: 18px;
+        }
+
+        .input-section button:hover {
+            color: #fff;
+        }
+
+        #imageUpload {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .upload-label img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .spinner {
+            border: 4px solid black;
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }    
+        }
+
+        @media (max-width: 800px) {
+            .container {
+              flex-direction: column;
+              align-items: center;
+            }
+          
+            body {
+              width: 70%;
+              margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% block  content %}
+    {% csrf_token %}
+    <div class="menu-icon">
+        <img src="{% static "menu.png" %}" alt="menu" id="menuIcon">
+    </div>
+
+    <div class="dropdown-menu" id="dropdownMenu">
+        <a href="#" onclick="showProfile()">Profile</a>
+        <a href="#" onclick="showSettings()">Settings</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="container">
+        <img src="{% static "bot1.png" %}" alt="bot" class="avatar">
+        <h2 style="color: #f0f0f0; text-align:center;">Conversational & Image Recognition Chatbot</h2>
+
+        <div class="chat-history" id="chatHistory"><div class="chatbot-message">Hello! What can I help you with?</div></div>
+
+        <div class="input-section">
+            <label for="imageUpload" id="image" class="upload-label">
+                <img src="{% static "upload.png" %}" alt="Upload Icon">
+            </label>
+            <input type="file" id="imageUpload" accept="image/*">
+            <input type="text" id="prompt" placeholder="Type a message...">
+            <button id="submit">&#x21A9;</button>
+        </div>
+    </div>
+    {% endblock %}
+
+
+
+{% comment %} Java Script {% endcomment %}
+
+    <script>
+        let prompt = document.querySelector("#prompt");
+        let submitbtn = document.querySelector("#submit");
+        let chatContainer = document.querySelector(".chat-history");
+        let imagebtn = document.querySelector("#image");
+        let image = document.querySelector("#image img");
+        let imageinput = document.querySelector("#imageUpload");
+        let menuIcon = document.querySelector("#menuIcon");
+        let dropdownMenu = document.querySelector("#dropdownMenu");
+
+        let chatHistory = [];  // Stores the full conversation context
+
+        const Api_Url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCVEAM0k-yKWYlmNBLqNRDphCjiH8PF8mk";
+
+        let user = {
+            message: null,
+            file: {
+                mime_type: null,
+                data: null
+            }
+        };
+
+        // API Call for Generating Response
+        async function generateResponse(aiChatBox) {
+            let text = aiChatBox.querySelector(".ai-chat-area");
+
+            // Build conversation history with role specification
+            let contents = chatHistory.map(item => ({
+                role: item.type === "user" ? "user" : "model",
+                parts: [{ "text": item.message }]
+            }));
+
+            // Append current user message
+            contents.push({
+                role: "user",
+                parts: [
+                    { "text": user.message },
+                    ...(user.file.data ? [{ "inline_data": user.file }] : [])
+                ]
+            });
+
+            let RequestOption = {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: contents
+                })
+            };
+
+            try {
+                let response = await fetch(Api_Url, RequestOption);
+                let data = await response.json();
+
+                if (!response.ok || !data.candidates || data.candidates.length === 0) {
+                    throw new Error(data.error?.message || "AI didn't respond.");
+                }
+
+                // Get AI Response
+                let apiResponse = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+                text.innerHTML = apiResponse;
+
+                // Store AI Response to Chat History
+                chatHistory.push({ message: apiResponse, type: "model" });
+                
+            } catch (error) {
+                console.error("API Error:", error);
+                text.innerHTML = "Sorry, an error occurred. Please try again later.";
+            } finally {
+                chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+                image.classList.remove("choose");
+                user.file = {};
+            }
+        }
+
+        // Create Chat Box for User and AI
+        function createChatBox(html, classes) {
+            let div = document.createElement("div");
+            div.innerHTML = html;
+            div.classList.add(classes);
+            return div;
+        }
+
+        // Handle Chat Responses
+        function handlechatResponse(userMessage) {
+            user.message = userMessage || "";
+            if (!user.message && !user.file.data) return;
+            let html = `<div class="user-chat-area user-message">
+                            ${user.message}
+                            ${user.file.data ? `<img src="data:${user.file.mime_type};base64,${user.file.data}" class="chooseimg" />` : ""}
+                        </div>`;
+            
+            prompt.value = "";
+        
+            let userChatBox = createChatBox(html, "user-message");
+            chatContainer.appendChild(userChatBox);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+            let htmlTyping = `<div class="ai-chat-area chatbot-message"><div class="spinner"></div></div>`;
+            let aiChatBox = createChatBox(htmlTyping, "ai-chat-box");
+            chatContainer.appendChild(aiChatBox);
+            chatHistory.push({ message: user.message || "[Image]", type: "user" });
+            generateResponse(aiChatBox);
+            resetUploadButton();
+        }
+
+        imageinput.addEventListener("change", () => {
+            const file = imageinput.files[0];
+            if (!file) return;
+        
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    const maxWidth = 300;
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+                    user.file = {
+                        mime_type: file.type,
+                        data: canvas.toDataURL(file.type).split(",")[1]
+                    };
+        
+                    // Show image in upload button
+                    image.src = `data:${user.file.mime_type};base64,${user.file.data}`;
+                    image.classList.add("choose");
+                    imageinput.value = "";
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+
+        // Submit Button Click Handling
+        submitbtn.addEventListener("click", () => {
+            if (prompt.value.trim()) {
+                handlechatResponse(prompt.value);
+                image.src = "{% static 'upload.png' %}";
+                image.classList.remove("choose");
+                user.file = { mime_type: null, data: null };
+            }
+        });
+
+        // Image Upload Handling
+        imagebtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            imageinput.click();
+        });
+
+
+        prompt.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && (prompt.value.trim() || user.file.data)) {
+                handlechatResponse(prompt.value);
+            }
+        });
+        
+        // Submit Button Handling (Text or Image)
+        submitbtn.addEventListener("click", () => {
+            if (prompt.value.trim() || user.file.data) {
+                handlechatResponse(prompt.value);
+            }
+        });
+
+
+        function resetUploadButton() {
+            image.src = "{% static 'upload.png' %}";  // Reset to default icon
+            image.classList.remove("choose");
+            user.file = { mime_type: null, data: null };
+        }
+
+        // Dropdown Menu Toggle
+        menuIcon.addEventListener("click", () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!menuIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = "none";
+            }
+        });
+
+    </script>
+
+</body>
+</html>
